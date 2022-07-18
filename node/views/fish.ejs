@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="fish_list">
+      <div class="fish_list_head">
+        <div class="num">글번호</div>
+        <div class="market">위판장 번호</div>
+        <div class="market_name">위판장</div>
+        <div class="date">날짜</div>
+        <div class="species">어종</div>
+        <div class="length">체장</div>
+        <div class="height">체고</div>
+        <div class="weight">무게</div>
+      </div>
+      <div class="fish_list_body">
+        <% data.forEach((el) => { %>
+        <div class="item">
+          <div class="num"><%=el.fish_num%></div>
+          <div class="market"><%=el.market%></div>
+          <div class="market_name"><%=el.market_name%></div>
+          <div class="date"><%=el.date%></div>
+          <div class="species"><%=el.species%></div>
+          <div class="length"><%=el.length%></div>
+          <div class="height"><%=el.height%></div>
+          <div class="weight"><%=el.weight%></div>
+          <div class="img_button">
+            <form action="imgDown" method="POST">
+              <input type="hidden" name="fish_num" value=<%=el.fish_num%>>
+              <input type="submit" value="다운로드">
+            </form>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <div class="page_list_button">
+        <form action="/" method="GET">
+          <% for(i = 1; i <= cnt; i++) { %>
+          <input class="list_btn" type="submit" name="page" value=<%=i%>> 
+          <% } %>
+          <input type="hidden" name="start_date" value=<%=query.start_date%> />
+          <input type="hidden" name="end_date" value=<%= query.end_date%> />
+          <input type="hidden" name="market" value=<%= query.marketQuery%> />
+        </form>
+      </div>
+      <div class="searching_box">
+        <form action="/" method="GET">
+          시작일<input type="date" name="start_date" value=<%=query.start_date%>/>
+          종료일<input type="date" name="end_date" value=<%=query.end_date%>/>
+          위판장<input type="text" name="market">
+          <input type="submit" value="검색">
+        </form>
+      </div>
+      <div class="download_button" style="float:right">
+        <form action="/download" method="GET">
+          <input type="hidden" name="start_date" value=<%=query.start_date%> />
+          <input type="hidden" name="end_date" value=<%= query.end_date %> />
+          <input type="hidden" name="market" value=<%= query.marketQuery%> />
+          <input type="submit" value="다운로드" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,99 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.fish_list {
+    padding: 50px;
+}
+
+.fish_list_head > div,
+.fish_list_body .item > div {
+    display: inline-block;
+    text-align: center;
+}
+
+.fish_list_head {
+    border-top : 2px solid black;
+    border-bottom : 1px solid black;
+}
+
+.fish_list_body .item {
+    border-bottom : 1px solid black;
+}
+
+.fish_list_head,
+.fish_list_body .item {
+    padding: 10px 0;
+}
+
+.fish_list_head > div {
+    font-weight : 800;
+}
+
+.fish_list .num {
+    width: 5%;
+}
+.fish_list .market {
+    width: 6%;
+}
+.fish_list .market_name {
+    width: 5%;
+}
+.fish_list .date {
+    width: 30%;
+}
+.fish_list .species {
+    width: 10%;
+}
+.fish_list .length {
+    width: 10%;
+}
+.fish_list .height {
+    width: 10%;
+}
+.fish_list .weight {
+    width: 10%;
+}
+.fish_list .img_button {
+    width: 10%
+}
+.page_list_button {
+    text-align: center;
+    padding: 10px;
+    color: skyblue;
+}
+
+.list_btn {
+    background-color: skyblue;
+    border: 0;
+    color:white;
+    padding:4px;
+    border-radius: 5px;
+}
+
+.download_button {
+    margin-right: 10px;
+    text-align: right;
+}
+
+.download_button input {
+    background: #222;
+    font-size: 12px;
+    color: #fff;
+    cursor: pointer;
+    padding: 2px 16px;
+    line-height: 20px;
+    border-radius:5px;
+    border:none;
+    letter-spacing:-1px;
+}
+
+.searching_box {
+    float: left;
+}
