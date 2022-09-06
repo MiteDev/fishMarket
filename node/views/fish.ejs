@@ -39,16 +39,29 @@
         </div>
         <% }) %>
       </div>
+
       <div class="page_list_button">
         <form action="/" method="GET">
+          <% if(pageNum > 1) { %>
+            <a href="#" onclick="location.href='http://localhost:8000/?page=<%=pageNum-1%>&start_date=<%=start_date%>&end_date=<%=end_date%>'; return false">prev</a>
+          <% } %>
+          <%console.log('pageNum', pageNum) %>
           <% for(i = 1; i <= cnt; i++) { %>
-          <input class="list_btn" type="submit" name="page" value=<%=i%>> 
+            <% if(i==1 || i == cnt || (i >= pageNum - 2 && i <= pageNum + 2)) { %>
+              <input class="list_btn" type="submit" name="page" value=<%=i%>>
+            <% } else if(i == 2 || i == cnt - 1) { %>
+              <a href="#">...</a>
+            <% } %>  
+          <% } %>
+          <% if(pageNum != cnt) { %>
+            <a href="#" onclick="location.href='http://localhost:8000/?page=<%=Number(pageNum)+1%>&start_date=<%=start_date%>&end_date=<%=end_date%>'; return false">next</a>
           <% } %>
           <input type="hidden" name="start_date" value=<%=query.start_date%> />
           <input type="hidden" name="end_date" value=<%= query.end_date%> />
           <input type="hidden" name="market" value=<%= query.marketQuery%> />
         </form>
       </div>
+
       <div class="searching_box">
         <form action="/" method="GET">
           시작일<input type="date" name="start_date" value=<%=query.start_date%>/>

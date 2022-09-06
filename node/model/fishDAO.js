@@ -2,6 +2,7 @@ const db = require('../config/db_conn');
 
 const uploadFish = (parameters) => {
     return new Promise((resolve, reject) => {
+        console.log(parameters)
         db.query(`INSERT INTO image SET ?`, parameters, (err, result) => {
             if(err) reject(err);
             else resolve(result)

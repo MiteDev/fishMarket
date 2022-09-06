@@ -1,4 +1,4 @@
-import re
+from posixpath import split
 from flask import Flask, request
 import torch
 import os
@@ -25,7 +25,7 @@ def transform_image(infile):
     return timg
 
 def calc(species, length):
-    print(species, length)
+    weight = 0
     if species == '고등어':
         weight = round(0.0044 * (int(length) ** 3.362), 2) 
         
@@ -41,6 +41,15 @@ def calc(species, length):
     if species == '삼치':
         weight = round(6.577 * (int(length) ** 3.002), 2)
     
+    if species == '참홍어':
+        weight = round(0.0063 * (int(length) ** 3.3992), 2)
+        
+    if species == '붉은대게':
+        weight == round(0.0011 * (int(length) ** 2.79), 2)
+        
+    if species == '꽃게':
+        weight = round(0.0588 * (int(length) ** 3), 2)
+    
     return weight
 
 
@@ -52,26 +61,46 @@ def test():
     s = os.path.splitext(img_name)
     path = img_folder + img_name
     
-    length_split = (s[0].split('_'))[3]
+    name_split = s[0].split('_')
+    length_split = name_split[3]
+    height_split = name_split[4]
+    
+    strlength = list(str(length_split))
+    strheight = list(str(height_split))
+    
+    strlength.insert(len(strlength)-1, '.')
+    strheight.insert(len(strheight)-1, '.')
+    
+    lengthResult = ''.join(strlength)
+    heightResult = ''.join(strheight)
+    
+    name_split[3] = lengthResult
+    name_split[4] = heightResult
+    
+    test = '_'.join(name_split)
+    
+    print(test)
 
     input_tensor = transform_image(path)
     output = model(input_tensor)
     result = output[0].tolist()
+    
+    if max(result) <= 3:
+        return {'status': 0}
 
     result_max_idx = result.index(max(result))
-    
-    print(species[result_max_idx])
 
-    weight = calc(species[result_max_idx], length_split)
+    weight = calc(species[result_max_idx], float(lengthResult))
 
-    img_rename = s[0] + '_' + str(weight) + '_' + species[result_max_idx] + s[1]
-    src = img_folder+img_name
+    img_rename = test + '_' + str(weight) + '_' + species[result_max_idx] + s[1]
+    print(s[0])
+    src = img_folder + img_name
     dst = img_folder + img_rename
 
     os.rename(src, dst)
 
     # 변경된 이름 return
-    return {'img_rename': img_rename, 'weight': weight, 'species':species[result_max_idx]}
+    return {'img_rename': img_rename, 'weight': weight, 'species': species[result_max_idx]}
 
 
 if __name__ == '__main__':

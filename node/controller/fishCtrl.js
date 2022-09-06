@@ -17,7 +17,7 @@ const condition = (parameters) => {
     if (parameters.start_date === undefined || parameters.start_date === "") parameters.start_date = "2020-01-01";
     if (parameters.market === undefined || parameters.market == '/') {
         parameters.market = "";
-    } else if(parameters.market === "") {
+    } else if (parameters.market === "") {
 
     } else {
         parameters.marketQuery = parameters.market;
@@ -47,40 +47,54 @@ const upload_fish = async (req, res) => {
             content: original_file_name
         });
 
-        //nodejs에서 flask로의 post요청에 대한 응답
-        const result = pytest.data
-        const name_split = result.img_rename.split(/_|[.]/); //정규식 활용해서 문자열 자르기
-
-        const dateTime = name_split[1] + name_split[2];
-
-        //파일명에 적힌 날짜와 시간을 sql의 datetime 형식에 맞게 변환
-        let day = dayjs(dateTime);
-        day = day.format('YYYY-MM-DD HH:mm:ss');
-
-        //잘라진 문자열을 parameter객체에 알맞게 저장
-        const parameters = {
-            market: name_split[0],
-            date: day,
-            length: name_split[3],
-            height: name_split[4],
-            weight: result.weight,
-            species: result.species,
-            image_name: result.img_rename
-        }
-
-        fishDAO.uploadFish(parameters);
-
-        const marketKey = Object.keys(marketString);
-
-        marketKey.find(key => {
-            if(marketString[key] == parameters.market) {
-                parameters.market_name = key;
+        if (pytest.data.status === 0) {
+            try {
+                fs.unlinkSync(`../files/original/${original_file_name}`);
+                console.log(original_file_name)
+                res.status(200).send({'data': 'Not Found'});
+            } catch (error) {
+                if(error.code == 'ENOENT'){
+                    res.status(500);
+                    console.log("파일 삭제 Error 발생");
+                }
             }
-        })
+            
+        } else {
+            //nodejs에서 flask로의 post요청에 대한 응답
+            const result = pytest.data
+            const name_split = result.img_rename.split(/_|[.]/); //정규식 활용해서 문자열 자르기
 
-        res.status(200).send({
-            'data': parameters
-        });
+            const dateTime = name_split[1] + name_split[2];
+
+            //파일명에 적힌 날짜와 시간을 sql의 datetime 형식에 맞게 변환
+            let day = dayjs(dateTime);
+            day = day.format('YYYY-MM-DD HH:mm:ss');
+
+            //잘라진 문자열을 parameter객체에 알맞게 저장
+            const parameters = {
+                market: name_split[0],
+                date: day,
+                length: name_split[3] + '.' + name_split[4],
+                height: name_split[5] + '.' + name_split[6],
+                weight: result.weight,
+                species: result.species,
+                image_name: result.img_rename
+            }
+
+            await fishDAO.uploadFish(parameters);
+
+            const marketKey = Object.keys(marketString);
+
+            marketKey.find(key => {
+                if (marketString[key] == parameters.market) {
+                    parameters.market_name = key;
+                }
+            })
+
+            res.status(200).send({
+                'data': parameters
+            });
+        }
     } catch (err) {
         console.log(err);
         res.sendStatus(500);
@@ -88,12 +102,12 @@ const upload_fish = async (req, res) => {
 }
 
 const get_fish_data = async (req, res) => {
-    if(req.query.page === undefined) {
+    if (req.query.page === undefined) {
         req.query.page = 1;
     }
 
     const result_paging = paging(req.query.page);
-    
+
     const parameters = {
         end_date: req.query.end_date,
         start_date: req.query.start_date,
@@ -101,6 +115,9 @@ const get_fish_data = async (req, res) => {
         offset: result_paging.offset,
         limit: result_paging.limit
     }
+
+    let page_num = Math.max(1, parseInt(req.query.page));
+    page_num = !isNaN(page_num)?page_num:1;
 
     await condition(parameters);
 
@@ -110,10 +127,10 @@ const get_fish_data = async (req, res) => {
         const pageCnt = await fishDAO.page_count(parameters);
 
         let cnt = 0;
-        if(pageCnt[0].COUNT % 10 === 0) {    
+        if (pageCnt[0].COUNT % 10 === 0) {
             cnt = parseInt(pageCnt[0].COUNT / 10);
         } else {
-            cnt = parseInt(pageCnt[0].COUNT / 10)+1;
+            cnt = parseInt(pageCnt[0].COUNT / 10) + 1;
         }
 
         const marketKey = Object.keys(marketString);
@@ -123,13 +140,13 @@ const get_fish_data = async (req, res) => {
             el.date = day.format('YYYY-MM-DD HH:mm:ss');
             const market = parseInt(el.market);
             marketKey.find(key => {
-                if(marketString[key] === market) {
-                    el.market_name = marketKey[market-1];
+                if (marketString[key] === market) {
+                    el.market_name = marketKey[market - 1];
                 }
             })
         })
 
-        res.render('fish', { data: data, cnt: cnt, query: parameters, pageCnt: pageCnt[0].COUNT });
+        res.render('fish', { data: data, cnt: cnt, query: parameters, pageCnt: pageCnt[0].COUNT, pageNum: page_num, start_date: parameters.start_date, end_date: parameters.end_date });
     } catch (err) {
         console.log(err);
         res.redirect('/?page=1');
@@ -156,8 +173,8 @@ const download = async (req, res) => {
             el.date = day.format('YYYY-MM-DD');
             const market = parseInt(el.market);
             marketKey.find(key => {
-                if(marketString[key] === market) {
-                    el.market_name = marketKey[market-1];
+                if (marketString[key] === market) {
+                    el.market_name = marketKey[market - 1];
                 }
             })
         })
@@ -165,7 +182,7 @@ const download = async (req, res) => {
         const ws = await fs.createWriteStream(__dirname + '/../public/csv/' + time + ".csv");
         console.log(ws.path)
 
-        fastcsv.write(data, { headers: true })
+        await fastcsv.write(data, { headers: true })
             .on("finish", () => {
                 console.log("write csv successfully");
             })
@@ -185,7 +202,7 @@ const download_image = async (req, res) => {
         fish_num: req.body.fish_num
     }
     const file_name = await fishDAO.downloadImage(parameters);
-    
+
     res.download(__dirname + '/../../files/original/' + file_name[0].image_name);
 }
 
