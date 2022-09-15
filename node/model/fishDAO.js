@@ -19,18 +19,32 @@ const downloadImage = (parameters) => {
     })
 }
 
+const getMarketNum = (parameters) => {
+    return new Promise((resolve, reject) => {
+        db.query(`SELECT market_name FROM marketTable WHERE market_num = ?`, parameters.market, (err, db_data) => {
+            if(err) {
+                reject(err);
+            } else {
+                resolve(db_data);
+            }
+        })
+    })
+}
+
 const getFishData = (parameters) => {
     return new Promise((resolve, reject) => {
-        db.query(`SELECT * FROM image WHERE (date BETWEEN ? AND ?) AND market LIKE ? ORDER BY fish_num DESC LIMIT ?,?`, [parameters.start_date, parameters.end_date, `%${parameters.market}%`, parameters.offset, parameters.limit], (err, db_data) => {
+        db.query(`SELECT * FROM image WHERE (date BETWEEN ? AND ?) AND market_name LIKE ? ORDER BY fish_num DESC LIMIT ?,?`, [parameters.start_date, parameters.end_date, `%${parameters.market}%`, parameters.offset, parameters.limit], (err, db_data) => {
             if(err) reject(err);
-            else resolve(db_data);
+            else {
+                resolve(db_data);
+            }
         })
     })
 }
 
 const downloadFish = (parameters) => {
     return new Promise((resolve, reject) => {
-        db.query(`SELECT * FROM image WHERE (date BETWEEN ? AND ?) AND market LIKE ? ORDER BY fish_num DESC`, [parameters.start_date, parameters.end_date, `%${parameters.market}%`], (err, db_data) => {
+        db.query(`SELECT * FROM image WHERE (date BETWEEN ? AND ?) AND market_name LIKE ? ORDER BY fish_num DESC`, [parameters.start_date, parameters.end_date, `%${parameters.market}%`], (err, db_data) => {
             if(err) reject(err);
             else resolve(db_data);
         })
@@ -40,7 +54,7 @@ const downloadFish = (parameters) => {
 //SELECT COUNT(CASE WHEN date LIKE ? && market LIKE ? THEN fish_num END) AS COUNT FROM image
 const page_count = (parameters) => {
     return new Promise((resolve, reject) => {
-        db.query(`SELECT COUNT(CASE WHEN (date BETWEEN ? AND ?) && market LIKE ? THEN fish_num END) AS COUNT FROM image`, [parameters.start_date, parameters.end_date, `%${parameters.market}%`], (err, db_data) => {
+        db.query(`SELECT COUNT(CASE WHEN (date BETWEEN ? AND ?) && market_name LIKE ? THEN fish_num END) AS COUNT FROM image`, [parameters.start_date, parameters.end_date, `%${parameters.market}%`], (err, db_data) => {
             if(err) {
                 reject(err);
             } else {
@@ -55,5 +69,6 @@ module.exports = {
     getFishData,
     page_count,
     downloadFish,
-    downloadImage
+    downloadImage,
+    getMarketNum
 }

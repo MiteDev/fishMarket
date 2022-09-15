@@ -40,22 +40,22 @@ a {
     width: 5%;
 }
 .fish_list .market {
-    width: 6%;
+    width: 10%;
 }
 .fish_list .market_name {
-    width: 5%;
+    width: 20%;
 }
 .fish_list .date {
-    width: 30%;
+    width: 20%;
 }
 .fish_list .species {
-    width: 10%;
+    width: 5%;
 }
 .fish_list .length {
-    width: 10%;
+    width: 8%;
 }
 .fish_list .height {
-    width: 10%;
+    width: 8%;
 }
 .fish_list .weight {
     width: 10%;
