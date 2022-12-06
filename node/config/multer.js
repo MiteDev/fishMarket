@@ -1,8 +1,10 @@
 const multer = require('multer');
+const imgFilePath = "../files/img";
 
 const fish_img = multer.diskStorage({
     destination(req, file, cb){
-        cb(null, '../files/original');
+        // cb(null, '../../../../../data/fish_market/image');
+        cb(null, imgFilePath)
     },
     filename(req, file, cb) {
         cb(null, `${file.originalname}`);

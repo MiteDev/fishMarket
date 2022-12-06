@@ -1,4 +1,5 @@
 const db = require('../config/db_conn');
+// const db2 = require('../config/fish_conn');
 
 const uploadFish = (parameters) => {
     return new Promise((resolve, reject) => {
@@ -9,6 +10,16 @@ const uploadFish = (parameters) => {
         })
     })
 }
+
+// const uploadFish2 = (parameters) => {
+//     return new Promise((resolve, reject) => {
+//         console.log(parameters);
+//         db2.query(`INSERT INTO Land SET ?`, parameters, (err, result) => {
+//             if(err) reject(err);
+//             else resolve(result)
+//         })
+//     })
+// }
 
 const downloadImage = (parameters) => {
     return new Promise((resolve, reject) => {
@@ -70,5 +81,6 @@ module.exports = {
     page_count,
     downloadFish,
     downloadImage,
-    getMarketNum
+    getMarketNum,
+    // uploadFish2
 }

@@ -16,7 +16,7 @@ app = Flask(__name__)
 args = EasyDict({'encoder_name':'efficientnet-b0',
                  'num_classes':10,
                  'image_path' : '',
-                 'model_path' : './weights/Land.pth'
+                 'model_path' : './weights/best_model.pth'
                 })
 
 #Cuda Setting
@@ -82,85 +82,99 @@ def predict(args):
 
     return output
 
-def calc(species, length):
-    weight = 0
-    if species == '고등어':
-        weight = round(0.0044 * (int(length) ** 3.362), 2)
+#고등어
+def calc_mackerel(length):
+    return round(0.0044 * (length ** 3.362), 2)
 
-    if species == '전갱이':
-        weight = round(0.0236 * (int(length) ** 2.8362), 2)
+#전갱이
+def calc_horse_mackerel(length):
+    return round(0.0236 * (length ** 2.8362), 2)
 
-    if species == '갈치':
-        weight = round(0.0307 * (int(length) ** 2.7828), 2)
+#갈치
+def calc_cutlessfish(length):
+    return round(0.0307 * (length ** 2.7828), 2)
 
-    if species == '조기':
-        weight = round(0.0049 * (int(length) ** 3.2153), 2)
+#조기
+def calc_croaker(length):
+    return round(0.0049 * (length ** 3.2153), 2)
 
-    if species == '오징어':
-        weight = round(0.0049 * (int(length) ** 3.2153), 2)
+#오징어
+def calc_squid(length):
+    return round(0.0248 * (length ** 2.9961), 2)
 
-    if species == '삼치':
-        weight = round(6.577 * (int(length) ** 3.002), 2)
+#삼치
+def calc_spanish_mackerel(length):
+    return round(6.577 * (length ** 3.002), 2)
 
-    if species == '참홍어':
-        weight = round(0.0063 * (int(length) ** 3.3992), 2)
+#참홍어
+def calc_skate(length):
+    return round(0.0063 * (length ** 3.3992), 2)
 
-    if species == '붉은대게':
-        weight == round(0.0011 * (int(length) ** 2.79), 2)
+#붉은대게
+def calc_red_snow_crab(length):
+    return round(0.0011 * (length ** 2.79), 2)
 
-    if species == '꽃게':
-        weight = round(0.0588 * (int(length) ** 3), 2)
-
-    return weight
+calc_weight = {
+    'mackerel': calc_mackerel,
+    'horse_mackerel': calc_horse_mackerel,
+    'cutlessfish': calc_cutlessfish,
+    'croaker': calc_croaker,
+    'squid': calc_squid,
+    'spanish_mackerel': calc_spanish_mackerel,
+    'skate': calc_skate,
+    'red_snow_crab': calc_red_snow_crab
+}
 
 @app.route('/', methods=['POST'])
-def test():
-    print(f"device setting : {device}")
-    print(os.getcwd())
-    species = ['고등어', '전갱이', '갈치', '조기', '오징어', '삼치', '참홍어', '붉은대게', '꽃게', '없음']
-    img_folder = '../files/original/'
-    img_name = request.json['content']
-    s = os.path.splitext(img_name)
+def predictFish():
+    # '고등어', '전갱이', '갈치', '조기', '오징어', '삼치', '참홍어', '붉은대게', '꽃게', '없음'
+    species = ['mackerel', 'horse_mackerel', 'cutlessfish', 'croaker', 'squid', 'spanish_mackerel', 'skate', 'red_snow_crab', 'nothing']
+
+    img_folder = request.json['content']['path']
+    img_name = request.json['content']['original_file_name']
+
+    # s = os.path.splitext(img_name)
     path = img_folder + img_name
 
-    name_split = s[0].split('_')
-    length_split = name_split[3]
-    height_split = name_split[4]
+    # name_split = s[0].split('_')
+    # length_split = name_split[3]
+    # height_split = name_split[4]
 
-    strlength = list(str(length_split))
-    strheight = list(str(height_split))
+    # strlength = list(str(length_split))
+    # strheight = list(str(height_split))
 
-    strlength.insert(len(strlength)-1, '.')
-    strheight.insert(len(strheight)-1, '.')
+    # strlength.insert(len(strlength)-1, '.')
+    # strheight.insert(len(strheight)-1, '.')
 
-    lengthResult = ''.join(strlength)
-    heightResult = ''.join(strheight)
+    # lengthResult = ''.join(strlength)
+    # heightResult = ''.join(strheight)
 
-    name_split[3] = lengthResult
-    name_split[4] = heightResult
+    # name_split[3] = lengthResult
+    # name_split[4] = heightResult
 
-    test = '_'.join(name_split)
+    # test = '_'.join(name_split)
 
     args.image_path = path
 
     result = predict(args)
-    
+
     if result[0] == 9:
         return {'status': 0}
     else :
-        weight = calc(species[result[0]], float(lengthResult))
+        # print(lengthResult)
+        # weight = calc_weight[species[result[0]]](float(lengthResult))
 
-        img_rename = test + '_' + str(weight) + '_' + \
-            species[result[0]] + s[1]
+        # img_rename = test + '_' + str(weight) + '_' + \
+        #     species[result[0]] + s[1]
         
-        src = img_folder + img_name
-        dst = img_folder + img_rename
+        # src = img_folder + img_name
+        # dst = img_folder + img_rename
 
-        os.rename(src, dst)
+        # os.rename(src, dst)
         
         # 변경된 이름 return
-        return {'img_rename': img_rename, 'weight': weight, 'species': species[result[0]]}
-
+        # return {'img_rename': img_rename, 'weight': weight, 'species': species[result[0]]}
+        return {'species': species[result[0]]}
 
 if __name__ == '__main__':
     app.run()
